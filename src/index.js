@@ -57,6 +57,7 @@ import { setConfig } from './api/setConfig.js'
 import { status } from './api/status.js'
 import { statusMatrix } from './api/statusMatrix.js'
 import { tag } from './api/tag.js'
+import { updateServerInfo } from './api/updateServerInfo.js'
 import { version } from './api/version.js'
 import { walk } from './api/walk.js'
 import { writeBlob } from './api/writeBlob.js'
@@ -127,6 +128,7 @@ export {
   status,
   statusMatrix,
   tag,
+  updateServerInfo,
   version,
   walk,
   writeBlob,
@@ -197,6 +199,7 @@ export default {
   status,
   statusMatrix,
   tag,
+  updateServerInfo,
   version,
   walk,
   writeBlob,
