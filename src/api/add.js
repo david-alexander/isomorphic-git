@@ -60,22 +60,31 @@ async function addToIndex({ dir, gitdir, fs, filepath, index }) {
     filepath,
   })
   if (ignored) return
-  const stats = await fs.lstat(join(dir, filepath))
+  
+  let fullfilepath = join(dir, filepath)
+  let stats = await fs.lstat(fullfilepath)
+
+  while (stats && stats.isSymbolicLink())
+  {
+    let linktarget = posixifyPathBuffer(await fs.readlink(fullfilepath)).toString('utf8')
+    fullfilepath = join(fullfilepath.split('/').slice(0, -1).join('/'), linktarget)
+    stats = await fs.lstat(fullfilepath)
+  }
+
   if (!stats) throw new NotFoundError(filepath)
+
   if (stats.isDirectory()) {
-    const children = await fs.readdir(join(dir, filepath))
+    // TODO
+    console.log('TODO: Skipping descendants of', filepath)
+    /*
+    const children = await fs.readdir(fullfilepath)
     const promises = children.map(child =>
       addToIndex({ dir, gitdir, fs, filepath: join(filepath, child), index })
-    )
-    await Promise.all(promises)
-  } else {
-    while (stats.isSymbolicLink())
-    {
-      filepath = await fs.readlink(join(dir, filepath)).then(posixifyPathBuffer)
-      const stats = await fs.lstat(join(dir, filepath))
-      if (!stats) throw new NotFoundError(filepath)
-    }
-    const object = await fs.read(join(dir, filepath))
+      )
+      await Promise.all(promises)
+    */
+    } else {
+    const object = await fs.read(fullfilepath)
     if (object === null) throw new NotFoundError(filepath)
     const oid = await _writeObject({ fs, gitdir, type: 'blob', object })
     index.insert({ filepath, stats, oid })
